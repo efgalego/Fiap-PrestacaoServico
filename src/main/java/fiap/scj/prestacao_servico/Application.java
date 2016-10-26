@@ -1,5 +1,6 @@
 package fiap.scj.prestacao_servico;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
@@ -11,12 +12,15 @@ import java.nio.file.WatchKey;
 import java.nio.file.WatchService;
 
 import com.thoughtworks.xstream.XStream;
+import com.thoughtworks.xstream.io.xml.QNameMap;
+import com.thoughtworks.xstream.io.xml.StaxDriver;
 
 import fiap.scj.prestacao_servico.repositorio.CidadaoRepositorio;
 import fiap.scj.prestacao_servico.to.CidadaoTO;
 
 public class Application {
 
+	private static final String RESPONSE = ".RESPONSE";
 	public static Path contextPath;
 	
 	public static void main(String[] args) {
@@ -53,7 +57,7 @@ public class Application {
 						if (kind == StandardWatchEventKinds.OVERFLOW) {
 							continue;
 						}
-						if (kind == StandardWatchEventKinds.ENTRY_CREATE) {
+						if (kind == StandardWatchEventKinds.ENTRY_CREATE && !fileName.toString().endsWith(RESPONSE)) {
 							
 							CidadaoTO to = processarArquivo(fileName);							
 							if (to != null) {
@@ -73,8 +77,16 @@ public class Application {
 
 	private static CidadaoTO processarArquivo(Path fileName) {
 		try {
-			String conteudo = new String(Files.readAllBytes(Paths.get(contextPath.toString() + fileName.toString())));
-			CidadaoTO to = (CidadaoTO) new XStream().fromXML(conteudo);
+			String conteudo = new String(Files.readAllBytes(Paths.get(contextPath.toString() + File.separatorChar + fileName.toString())));
+			
+			QNameMap qmap = new QNameMap();
+			qmap.setDefaultNamespace("http://www.fiap.com.br");
+			qmap.setDefaultPrefix("ns0");
+			StaxDriver staxDriver = new StaxDriver(qmap); 
+			XStream xstream = new XStream(staxDriver);
+			xstream.alias("CidadaoTO", CidadaoTO.class);
+			
+			CidadaoTO to = (CidadaoTO) xstream.fromXML(conteudo);
 			System.out.println(to);
 			return to;
 		} catch (Exception e) {
@@ -85,7 +97,7 @@ public class Application {
 	
 	private static void criarArquivoResposta(String registro, Path originalFileName) {
 		try {
-			String novoFile = originalFileName.toString() + ".RESPONSE";
+			String novoFile = contextPath.toString() + File.separatorChar + originalFileName.toString() + RESPONSE;
 			Files.write(Paths.get(novoFile), registro.getBytes());
 		} catch (IOException e) {
 			System.err.println("Erro ao gravar resposta: " + e.toString());

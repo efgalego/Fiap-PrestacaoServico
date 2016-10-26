@@ -1,5 +1,9 @@
 package fiap.scj.prestacao_servico.to;
 
+import com.thoughtworks.xstream.XStream;
+import com.thoughtworks.xstream.annotations.XStreamAlias;
+
+@XStreamAlias("CidadaoTO")
 public class CidadaoTO {
 
 	private String registro;
@@ -60,5 +64,10 @@ public class CidadaoTO {
 	@Override
 	public String toString() {
 		return "DadosCidadaoTO [registro=" + registro + ", nomeCidadao=" + nomeCidadao + ", telefone=" + telefone + ", email=" + email + ", observacoes=" + observacoes + "]";
+	}
+	
+	public static void main(String[] args) {
+		CidadaoTO to = new CidadaoTO("", "nome", "(11) 454545", "", "");
+		System.out.println(new XStream().toXML(to));		
 	}
 }
