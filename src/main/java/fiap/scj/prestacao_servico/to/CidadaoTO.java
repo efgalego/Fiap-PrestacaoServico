@@ -66,8 +66,4 @@ public class CidadaoTO {
 		return "DadosCidadaoTO [registro=" + registro + ", nomeCidadao=" + nomeCidadao + ", telefone=" + telefone + ", email=" + email + ", observacoes=" + observacoes + "]";
 	}
 	
-	public static void main(String[] args) {
-		CidadaoTO to = new CidadaoTO("", "nome", "(11) 454545", "", "");
-		System.out.println(new XStream().toXML(to));		
-	}
 }
